@@ -1,3 +1,4 @@
+#用这个打包就可以,不要用官方的make
 FROM ubuntu:20.04
 RUN rm -rf /etc/apt/sources.list
 COPY sources.list /etc/apt/
