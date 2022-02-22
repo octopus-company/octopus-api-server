@@ -1,0 +1,34 @@
+FROM ubuntu:20.04
+RUN rm -rf /etc/apt/sources.list
+COPY sources.list /etc/apt/
+RUN apt-get update && apt-get install -y xz-utils tini && \
+    useradd rancher && \
+    mkdir -p /var/lib/rancher/octopus-ui  && \
+    chown -R rancher /var/lib/rancher/octopus-ui /usr/local/bin
+
+WORKDIR /var/lib/rancher/octopus-ui
+
+ENV OCTOPUS_UI_VERSION v1.0.2
+ENV OCTOPUS_UI_PATH /usr/share/rancher/octopus-ui
+ENV OCTOPUS_API_UI_VERSION 1.1.9
+
+RUN mkdir -p /usr/share/rancher/octopus-ui && \
+    cd /usr/share/rancher/octopus-ui && \
+    mkdir -p /usr/share/rancher/octopus-ui/api-ui && \
+    cd /usr/share/rancher/octopus-ui/api-ui && \
+    cd /var/lib/rancher/octopus-ui
+COPY v1.0.2.tar /usr/share/rancher/octopus-ui
+COPY 1.1.9.tar /var/lib/rancher/octopus-ui
+RUN cd /usr/share/rancher/octopus-ui && \
+    tar -xvf v1.0.2.tar && \
+    cd v1.0.2 && \
+    mv ./* ../ && \
+    cd /var/lib/rancher/octopus-ui && \
+    tar -xvf 1.1.9.tar && \
+    cd 1.1.9 && \
+    mv ./* ../
+COPY entrypoint.sh octopus-api-server /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh
+
+VOLUME /var/lib/rancher/octopus-ui
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
